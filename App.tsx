@@ -5,24 +5,23 @@
  * @format
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type {PropsWithChildren} from 'react';
+import branch from 'react-native-branch';
 import {
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  Button,
   useColorScheme,
   View,
 } from 'react-native';
 
 import {
   Colors,
-  DebugInstructions,
   Header,
-  LearnMoreLinks,
-  ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
 type SectionProps = PropsWithChildren<{
@@ -62,6 +61,72 @@ function App(): React.JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  useEffect(() => {
+    const branchSubscribe = branch.subscribe({
+      onOpenStart: ({uri, cachedInitialEvent}) => {
+        console.log(
+          '[branch.io] subscribe onOpenStart, will open ' +
+            uri +
+            ' cachedInitialEvent is ' +
+            cachedInitialEvent,
+        );
+      },
+      onOpenComplete: ({ error, params, uri }) => {
+        if (error) {
+          console.error(`[branch.io] subscribe onOpenComplete, Error from opening uri: ${uri} Error: ${error}`);
+          return;
+        }
+        else {
+          console.log(`[branch.io] effect subscribe: ${JSON.stringify(params)}`);
+        }
+      },
+    });
+
+    return () => {
+      branchSubscribe();
+    };
+  }, []);
+
+  const ceateBranchLink = async () => {
+    console.log("Create Branch Link");
+    let buo = await branch.createBranchUniversalObject('referAndEarn', {
+      locallyIndex: true,
+      title: 'CashKaro App Referral',
+      contentDescription: 'Invite your friends and earn rewards!',
+      contentMetadata: {
+        customMetadata: {
+          r: 'john123',
+          refName: 'johnDoe',
+          source: 'android',
+        },
+      },
+    });
+
+    let linkProperties = {
+      feature: 'referral',
+      channel: 'app',
+      campaign: 'appReferral',
+    };
+
+    let controlParams = {
+    };
+
+    let { url } = await buo.generateShortUrl(linkProperties, controlParams);
+  }
+
+  const fetchLatData = async () => {
+    try {
+      const attributionWindow = 1;
+      const latd = await branch.lastAttributedTouchData(attributionWindow);
+      if (latd) {
+        console.log(latd)
+        console.log(`[branch.io] fetch LATD successfully: ${JSON.stringify(latd)}`);
+      }
+    } catch (error) {
+      console.error('[branch.io] Fails fetching LATD: ', error);
+    }
+  };
+
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar
@@ -76,20 +141,18 @@ function App(): React.JSX.Element {
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
+          <Section title="Create Link">
+            <Button
+              title="Press me"
+              onPress={ceateBranchLink}
+            />
           </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
+          <Section title="Fetch LATD">
+            <Button
+              title="Press me"
+              onPress={fetchLatData}
+            />
           </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
         </View>
       </ScrollView>
     </SafeAreaView>

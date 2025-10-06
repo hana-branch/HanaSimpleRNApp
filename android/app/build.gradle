@@ -116,4 +116,6 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    implementation 'io.branch.sdk.android:library:5.15.1' // Check for latest version before hard-coding
 }
