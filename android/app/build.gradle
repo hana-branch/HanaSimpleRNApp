@@ -116,6 +116,6 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-
+    implementation "com.google.android.gms:play-services-ads-identifier:18.0.1"
     implementation 'io.branch.sdk.android:library:5.15.1' // Check for latest version before hard-coding
 }
