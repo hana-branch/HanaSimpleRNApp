@@ -55,6 +55,7 @@ function Section({children, title}: SectionProps): React.JSX.Element {
 }
 
 function App(): React.JSX.Element {
+  console.log('[branch.io] App.tsx component rendered');
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
@@ -62,8 +63,10 @@ function App(): React.JSX.Element {
   };
 
   useEffect(() => {
+    console.log('[branch.io] useEffect triggered');
     const branchSubscribe = branch.subscribe({
       onOpenStart: ({uri, cachedInitialEvent}) => {
+        console.log('[branch.io] onOpenStart triggered');
         console.log(
           '[branch.io] subscribe onOpenStart, will open ' +
             uri +
@@ -72,15 +75,28 @@ function App(): React.JSX.Element {
         );
       },
       onOpenComplete: ({ error, params, uri }) => {
+        console.log('[branch.io] onOpenComplete triggered');
         if (error) {
           console.error(`[branch.io] subscribe onOpenComplete, Error from opening uri: ${uri} Error: ${error}`);
           return;
         }
-        else {
-          console.log(`[branch.io] effect subscribe: ${JSON.stringify(params)}`);
-        }
+        console.log(`[branch.io] effect subscribe: ${JSON.stringify(params)}`);
       },
     });
+
+    // Fetch latest referring params on mount
+    const fetchLatestReferringParams = async () => {
+      console.log('[branch.io] fetchLatestReferringParams called');
+      try {
+        const latestParams = await branch.getLatestReferringParams();
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log(`[branch.io] Latest referring params: ${JSON.stringify(latestParams)}`);
+        // Use latestParams for routing, analytics, etc.
+      } catch (err) {
+        console.error(`[branch.io] Error fetching latest referring params: ${err}`);
+      }
+    };
+    fetchLatestReferringParams();
 
     return () => {
       branchSubscribe();
@@ -88,7 +104,6 @@ function App(): React.JSX.Element {
   }, []);
 
   const ceateBranchLink = async () => {
-    console.log("Create Branch Link");
     let buo = await branch.createBranchUniversalObject('referAndEarn', {
       locallyIndex: true,
       title: 'CashKaro App Referral',

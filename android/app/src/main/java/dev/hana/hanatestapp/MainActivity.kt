@@ -24,7 +24,7 @@ class MainActivity : ReactActivity() {
 
   override fun onStart() {
     super.onStart()
-    RNBranchModule.initSession(getIntent().getData(), this)
+    RNBranchModule.initSession(intent?.data, this) // ✅ Cold start initialization
   }
 
   override fun onNewIntent(intent: Intent?) {
