@@ -74,29 +74,23 @@ function App(): React.JSX.Element {
             cachedInitialEvent,
         );
       },
-      onOpenComplete: ({ error, params, uri }) => {
+      onOpenComplete: async ({ error, params, uri }) => {
         console.log('[branch.io] onOpenComplete triggered');
         if (error) {
           console.error(`[branch.io] subscribe onOpenComplete, Error from opening uri: ${uri} Error: ${error}`);
           return;
         }
         console.log(`[branch.io] effect subscribe: ${JSON.stringify(params)}`);
+
+        try {
+          console.log('[branch.io] fetchLatestReferringParams called');
+          const latestParams = await branch.getLatestReferringParams();
+          console.log(`[branch.io] Latest referring params: ${JSON.stringify(latestParams)}`);
+        } catch (err) {
+          console.error(`[branch.io] Error fetching latest referring params: ${err}`);
+        }
       },
     });
-
-    // Fetch latest referring params on mount
-    const fetchLatestReferringParams = async () => {
-      console.log('[branch.io] fetchLatestReferringParams called');
-      try {
-        const latestParams = await branch.getLatestReferringParams();
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        console.log(`[branch.io] Latest referring params: ${JSON.stringify(latestParams)}`);
-        // Use latestParams for routing, analytics, etc.
-      } catch (err) {
-        console.error(`[branch.io] Error fetching latest referring params: ${err}`);
-      }
-    };
-    fetchLatestReferringParams();
 
     return () => {
       branchSubscribe();
